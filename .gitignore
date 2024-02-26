@@ -1,0 +1,19 @@
+# Python
+*.pyc
+
+# tex
+*.aux
+*.log
+*.pdf
+*.out
+*.toc
+*.bbl
+
+
+
+# code
+*.code-workspace
+.vscode/settings.json
+
+# virtual environment
+env/
