@@ -1,8 +1,7 @@
  # Deterministic safety guarantees for learning-based control of monotone nonlinear systems under uncertainty
 -----------------
 This repository contains the code for the paper "Deterministic safety guarantees for learning-based control of monotone nonlinear systems under uncertainty" by J.Adamek, M.Heinlein, L.Lüken, S.Lucia. 
-
-Abstract:
+**Abstract**:
 This paper presents a novel framework to guarantee safety for learning-based control of nonlinear monotone systems under uncertainty. We propose to evaluate online whether a one-step simulation brings a nonlinear system into a robust control invariant (RCI) set. Such evaluation can be very efficiently computed even under the presence of uncertainty for learning-based approximate controllers and monotone systems, which also enable a simple computation of RCI sets. In case the one-step simulation drives the system outside of the RCI set, a fallback strategy is used, which is obtained as a byproduct of the RCI set computation.   
 We also develop a method to calculate an $N$-step RCI set to reduce the conservativeness of the proposed strategy and we illustrate the results with a simulation study of a nonlinear monotone system.
 -----------------
