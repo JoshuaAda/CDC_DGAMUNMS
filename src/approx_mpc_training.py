@@ -31,7 +31,7 @@ val_data_file_name = "dataset_10000.pt"
 val_data_folder = file_pth.joinpath('datasets')
 
 # NN
-n_layers = 6 #(L = n+1)
+n_layers = 6
 n_neurons = 200
 n_in = 4
 n_out = 2
