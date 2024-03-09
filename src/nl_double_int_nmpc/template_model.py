@@ -46,17 +46,10 @@ def template_model(symvar_type='SX'):
     R = np.array([[0, 0],
                   [0, 0]])
 
-    # x_sp = np.array([[2],[2]])
+
     stage_cost = (_x-x_sp).T@Q@(_x-x_sp) + _u.T@R@_u
     terminal_cost = (_x-x_sp).T@Q@(_x-x_sp)
 
-    # stage_cost = _x[0] + _u.T@R@_u
-    # terminal_cost = _x[0]
-    # stage_cost = _x[0]+_x[1] + _u.T@R@_u
-    # terminal_cost = _x[0]+_x[1]
-
-    # stage_cost = _x.T@Q@_x + _u.T@R@_u
-    # terminal_cost = _x.T@Q@_x
 
     model.set_expression(expr_name='stage_cost', expr=stage_cost)
     model.set_expression(expr_name='terminal_cost', expr=terminal_cost)

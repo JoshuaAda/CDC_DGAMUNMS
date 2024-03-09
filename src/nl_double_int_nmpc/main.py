@@ -71,7 +71,9 @@ lub, ubu = np.array(mpc.bounds['lower','_u','u']), np.array(mpc.bounds['upper','
 count=0
 count_viol=0
 times=[]
+times_safey=[]
 stage_costs=[]
+
 M=1000
 """1000 uncertainty realizations"""
 for k in range(M):
@@ -79,10 +81,11 @@ for k in range(M):
     simulator = template_simulator(model)
     np.random.seed(k)
     e = np.ones([model.n_x,1])
-    in_set=False
-    while not in_set:
-        x0 = np.random.uniform(np.array([[0],[0]]),np.array([[10],[10]]))#np.array([[8],[7]])#np.random.uniform(2*e,8*e)
-        in_set=any([in_rectangle(x0,lbx_rect[k],ubx_rect[k]) for k in range(len(lbx_rect))])
+    """Initial state and input"""
+    #in_set=False
+    #while not in_set:
+    x0 = np.array([[8],[7]])#np.random.uniform(np.array([[0],[0]]),np.array([[10],[10]]))#np.array([[8],[7]])#np.random.uniform(2*e,8*e)
+    #in_set=any([in_rectangle(x0,lbx_rect[k],ubx_rect[k]) for k in range(len(lbx_rect))])
     u0 = np.array([0.0,0.0]).reshape(2,1)
 
 
@@ -120,12 +123,14 @@ for k in range(M):
 
         """Safety filter/ if set to Flase evaluation without safety filter"""
         Cond=[not in_rectangle(x0_2,lbx_rect[k],ubx_rect[k]) or not in_rectangle(x0_1,lbx_rect[k],ubx_rect[k]) for k in range(len(lbx_rect))]
-        if all(Cond):#False:#not in_rectangle(x0_2,lbx_rect,ubx_rect) or not in_rectangle(x0_1,lbx_rect,ubx_rect):
+        if any(Cond):
             count=count+1
             simulator.x0=x0
             estimator.x0=x0
             u0=find_save_input(x0)
             mpc.u0=u0
+        m= time.time()
+        times_safety.append(m-r)
         y_next = simulator.make_step(u0)
         x0_new = estimator.make_step(y_next)
         x0=x0_new
@@ -134,6 +139,7 @@ for k in range(M):
     stage_costs.append(sum(simulator.data['_aux', 'stage_cost']))
 myu=sum(times)/len(times)
 print(myu)
+print(sum(times_safety)/len(times_safety))
 print(count)
 print(count_viol)
 print(sum(stage_costs)/len(stage_costs))
@@ -185,4 +191,5 @@ fig1.savefig("States_Robust.svg")
 fig2.savefig("Inputs_Robust.svg")
 fig3.savefig("Trajectory_Robust.svg")
 fig4.savefig("Cost_Robust.svg")
+
 input('press any key to exit')
