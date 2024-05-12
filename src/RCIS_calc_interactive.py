@@ -444,7 +444,7 @@ for i in range(1):
 g = vertcat(*g)
 lb_g = vertcat(*lb_g)
 ub_g = vertcat(*ub_g)
-
+x=time.time()
 prob = {'f':J,'x':vertcat(opt_x),'g':g, 'p':vertcat(x_ref,p_plus,p_minus)}
 solver_mx_inv_set = nlpsol('solver','ipopt',prob)
 
@@ -454,7 +454,8 @@ opt_ro_initial=opt_x(0)
 opt_ro_initial['x_min']=x_set
 opt_ro_initial['x_max']=x_set
 results=solver_mx_inv_set(p=vertcat(x_set,p_max,p_min),x0=opt_ro_initial, lbg=lb_g,ubg=ub_g,lbx=lb_opt_x,ubx=ub_opt_x)
-
+y=time.time()
+print(y-x)
 # %%
 res=opt_x(results['x'])
 

@@ -30,7 +30,7 @@ def template_simulator(model):
 
     # uncertain parameters
     p_num = simulator.get_p_template()
-    p_num["x_sp"] = np.array([[5],[1]])
+    p_num["x_sp"] = np.array([[5],[2]])
     p_num['p'] = np.array([[0.25]])
     def p_fun(t_now):
         return p_num

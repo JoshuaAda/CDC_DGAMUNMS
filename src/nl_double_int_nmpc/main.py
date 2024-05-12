@@ -71,7 +71,7 @@ lub, ubu = np.array(mpc.bounds['lower','_u','u']), np.array(mpc.bounds['upper','
 count=0
 count_viol=0
 times=[]
-times_safey=[]
+times_safety=[]
 stage_costs=[]
 
 M=1000
@@ -84,9 +84,11 @@ for k in range(M):
     """Initial state and input"""
     #in_set=False
     #while not in_set:
-    x0 = np.array([[8],[7]])#np.random.uniform(np.array([[0],[0]]),np.array([[10],[10]]))#np.array([[8],[7]])#np.random.uniform(2*e,8*e)
+    x0 = np.array([[8.5],[7]])#np.random.uniform(np.array([[0],[0]]),np.array([[10],[10]]))#np.array([[8],[7]])#np.random.uniform(2*e,8*e)
     #in_set=any([in_rectangle(x0,lbx_rect[k],ubx_rect[k]) for k in range(len(lbx_rect))])
-    u0 = np.array([0.0,0.0]).reshape(2,1)
+    u0 = np.array([-5,-10]).reshape(2,1)
+    R=np.array([[1,0],[0,1]])
+    Q=np.array([[1,0],[0,1]])
 
 
     N_sim = 20
@@ -103,25 +105,27 @@ for k in range(M):
 
     # Use initial state to set the initial guess.
     mpc.set_initial_guess()
+    x_ref=np.array([5,2])
     print(k)
 
     # MAIN LOOP
 
 
     robust_mpc.u0=u0
+    J=0
     """Simulation of 10 steps"""
     for k in range(N_sim):
         x=torch.Tensor(np.array([x0[0],x0[1],u0[0],u0[1]])).squeeze()
         s = time.time()
-
+        u_prev=u0
         """ Controller evaluation and forward prediction"""
-        u0 = mpc_app.make_step(x,clip_outputs=False).reshape((2,1))##robust_mpc.make_step(x0)#robust_mpc.make_step(x0)##mpc.make_step(x0)#
+        u0 = mpc.make_step(x0)#mpc_app.make_step(x,clip_outputs=False).reshape((2,1))#robust_mpc.make_step(x0)##robust_mpc.make_step(x0)#mpc.make_step(x0)#mpc_app.make_step(x,clip_outputs=False).reshape((2,1))#mpc.make_step(x0)#mpc_app.make_step(x,clip_outputs=False).reshape((2,1))#robust_mpc.make_step(x0)#mpc.make_step(x0)#mpc_app.make_step(x,clip_outputs=False).reshape((2,1))#mpc.make_step(x0)#mpc_app.make_step(x,clip_outputs=False).reshape((2,1))##robust_mpc.make_step(x0)#robust_mpc.make_step(x0)##mpc.make_step(x0)#
         r = time.time()
         times.append(r-s)
         x0_1=f(x0,u0,0.0)
         x0_2=f(x0,u0,0.3)
 
-        """Safety filter/ if set to Flase evaluation without safety filter"""
+        """Safety filter/ if set to False evaluation without safety filter"""
         Cond=[not in_rectangle(x0_2,lbx_rect[k],ubx_rect[k]) or not in_rectangle(x0_1,lbx_rect[k],ubx_rect[k]) for k in range(len(lbx_rect))]
         if any(Cond):
             count=count+1
@@ -136,7 +140,9 @@ for k in range(M):
         x0=x0_new
         if not in_rectangle(x0,lbx,ubx):
             count_viol+=1
-    stage_costs.append(sum(simulator.data['_aux', 'stage_cost']))
+        J+=(x0.reshape((2,1))-x_ref.reshape((2,1))).T@Q@(x0.reshape((2,1))-x_ref.reshape((2,1)))+(u0-u_prev).T@R@(u0-u_prev)
+    stage_costs.append(J)
+    #print(sum(stage_costs)/len(stage_costs))
 myu=sum(times)/len(times)
 print(myu)
 print(sum(times_safety)/len(times_safety))
@@ -181,15 +187,15 @@ axs_3.set_xlabel('x0')
 axs_3.set_ylabel('x1')
 axs_3.legend(['trajectory','start','end'])
 
-fig4, axs_4 = plt.subplots(1,1)
-axs_4.plot(simulator.data['_aux','stage_cost'])
-axs_4.set_ylabel('stage_cost')
-axs_4.set_xlabel('time')
-print(sum(simulator.data['_aux','stage_cost']))
-plt.show(block=False)
-fig1.savefig("States_Robust.svg")
-fig2.savefig("Inputs_Robust.svg")
-fig3.savefig("Trajectory_Robust.svg")
-fig4.savefig("Cost_Robust.svg")
+#fig4, axs_4 = plt.subplots(1,1)
+#axs_4.plot(simulator.data['_aux','stage_cost'])
+#axs_4.set_ylabel('stage_cost')
+#axs_4.set_xlabel('time')
+#print(sum(simulator.data['_aux','stage_cost']))
+#plt.show()
+#fig1.savefig("States_Robust.svg")
+#fig2.savefig("Inputs_Robust.svg")
+#fig3.savefig("Trajectory_Robust.svg")
+#fig4.savefig("Cost_Robust.svg")
 
 input('press any key to exit')
